@@ -33,8 +33,6 @@ nick creel - algorithms - spring 2019 - marlboro college
 GNU GPL https://www.gnu.org/licenses/gpl.html
 '''
 from collections import defaultdict
-#stack exchange said this was the way to go if I wanted to append lists 
-#in a dict...so im going for it. 
 
 knightmoves = { 'upleft' : (-1,2),  #all the possible moves the knight can make
         'upright' : (1,2),  #defined as a tuple of x,y transformations 
@@ -58,10 +56,8 @@ class Stack():  #last in first out, works for DFS
 
 class Graph():
     def __init__(self, direction = False):
-        self.nodes = {}
+        self.nodes = defaultdict(list)
         self.direction = direction
-    def insertNode(self, node):
-        self.nodes.update(node=[])
 
 def generateBoard(board, n):
     '''
@@ -71,8 +67,7 @@ def generateBoard(board, n):
     '''
     for x in range(n):
         for y in range(n):
-            node = (x, y)
-            board.insertNode(node)
+            board.nodes[(x,y)].append(())
 
 def findNeighbors(board):
     '''
@@ -81,14 +76,14 @@ def findNeighbors(board):
     findNeighbor appends the list that node points to, including the 
     confirmed neighbor. if neighbor is not in board.nodes, nothing happens. 
     '''
-    for node in board.nodes:
-        listnode = list(node)
+    for key in board.nodes:
+        listnode = list(key)
         listnode[0] = int(listnode[0])
         listnode[1] = int(listnode[1])
         possibleneighbors = [(listnode[0]+1, listnode[1]), (listnode[0], listnode[1]+1), (listnode[0]-1, listnode[1]), (listnode[0], listnode[1]-1)]
         for neighbor in possibleneighbors:
             if board.nodes.has_key(neighbor) == True:
-                board.nodes[node].append(neighbor) 
+                board.nodes[key].append(neighbor) 
             else:
                 pass
 
