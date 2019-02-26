@@ -33,7 +33,6 @@ nick creel - algorithms - spring 2019 - marlboro college
 GNU GPL https://www.gnu.org/licenses/gpl.html
 '''
 from collections import defaultdict
-from operator import add
 
 knightmoves = { 'upleft' : (-1,2),  #all the possible moves the knight can make
         'upright' : (1,2),  #defined as a tuple of x,y transformations 
@@ -61,8 +60,41 @@ class Graph():
         self.direction = direction
 
 def addTuple(atuple, btuple):
-    result = tuple(map(add, atuple, btuple))    
+    '''
+    a lovely solution for adding the elements of a tuple
+    that I discovered on stack exchange after a lot of
+    whining about how python adds tuples by default.
+
+    https://stackoverflow.com/questions/497885/python-element-wise-tuple-operations-like-sum
+
+    thanks ironfroggy!
+
+    >>> atuple = (1,2,3)
+    >>> btuple = (4,5,6)
+    >>> addTuple(atuple, btuple)
+    (5,7,9)
+    '''
+    result = tuple(map(sum, zip(atuple, btuple)))    
     return result
+
+def findMoves(board):
+    '''
+    for each node in board.nodes, findNeighbor creates a list of possible
+    neighbors. if those possible neighbors exist in board.nodes, then
+    findNeighbor appends the list that node points to, including the 
+    confirmed neighbor. if neighbor is not in board.nodes, nothing happens.i
+
+
+    '''
+    for key in board.nodes:
+        for move in knightmoves:
+            # debug print(key)
+            # debug print(knightmoves[move])
+            temp = addTuple(key, knightmoves[move])
+            if temp in board.nodes:
+                board.nodes[key].append(temp) 
+            else:
+                pass
 
 def generateBoard(board, n):
     '''
@@ -72,32 +104,63 @@ def generateBoard(board, n):
     '''
     for x in range(n):
         for y in range(n):
-            board.nodes[(x,y)].append(())
+            board.nodes[(x,y)] = []
 
-def findMoves(board):
+def knightTour(board, start, movespossible, stack):
+    temp = {}
+    #print("debug start: {}".format(start)) 
+    for value in board.nodes[start]:
+        if value in stack.values and value in board.nodes:
+            del board.nodes[value]
+            pass
+        elif value in stack.values and value not in board.nodes:
+            pass
+        else:
+            temp[value] = movespossible[value]
+    try:
+        minimum = min(temp, key = temp.get)
+    except ValueError:
+        return stack.values
+    stack.push(minimum)
+    #print("debug possible destinations: {}".format(board.nodes[start]))
+    #print("debug stack: {}".format(stack.values))
+    #print("debug mimimum: {}".format(minimum))
+    #print("debug temp: {}".format(temp))
+    knightTour(board, minimum, movespossible, stack)
+
+def numMoves(board):
     '''
-    for each node in board.nodes, findNeighbor creates a list of possible
-    neighbors. if those possible neighbors exist in board.nodes, then
-    findNeighbor appends the list that node points to, including the 
-    confirmed neighbor. if neighbor is not in board.nodes, nothing happens. 
+    iterates over all possible moves to determine how many moves are
+    from each node...I know this can be done with a general len test
+    but I didn't want to have a dictionary of dictionaries storing the 
+    visited flag or remove vertices from the graph if they were already
+    visited. movesPossible will be used to determin the next node to visit
+    via Warnsdorf's rule
     '''
-    for key in board.nodes:
-        for move in knightmoves:
-            # debug print(key)
-            # debug print(knightmoves[move])
-            temp = tuple(map(sum, zip(key, knightmoves[move])))
-            if temp in board.nodes:
-                board.nodes[key].append(temp) 
-            else:
-                pass
+    movespossible = {}
+    for i in board.nodes:
+        length = len(board.nodes[i])
+        movespossible[i] = length
+    return movespossible
+
 
 def main():
+    visited = Stack()
     chessboard = Graph()
-    generateBoard(chessboard, 5)
+    n = input("hello! this program calculates a knight's tour starting at a particular point on an n x n chess board. What size would you like the chessboard to be? Please enter a natural number, I'm not built to deal with errors just yet :)\n >>> ")
+    n = int(n)
+    if n > 0 and type(n) == int:
+        generateBoard(chessboard, n)
+    else:
+        print("You broke it! that wasn't what I asked for at all...try again")
     print("Board nodes: " + str(chessboard.nodes.keys()))
     #debug  print("Possible moves (empty): " + str(chessboard.nodes.values()))
     findMoves(chessboard)
-    print("Possible moves (shouldn't be empty: " +str(chessboard.nodes.values()))
-
+    #debug print("Possible moves (shouldn't be empty: " +str(chessboard.nodes.values()))
+    nmoves = numMoves(chessboard)
+    start = (0,0)
+    visited.push(start)
+    knightTour(chessboard, start, nmoves, visited)
+    print("Visited nodes in Knight's Tour: " + str(visited.values))
 main() 
         
