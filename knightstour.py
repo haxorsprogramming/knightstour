@@ -33,6 +33,7 @@ nick creel - algorithms - spring 2019 - marlboro college
 GNU GPL https://www.gnu.org/licenses/gpl.html
 '''
 from collections import defaultdict
+from operator import add
 
 knightmoves = { 'upleft' : (-1,2),  #all the possible moves the knight can make
         'upright' : (1,2),  #defined as a tuple of x,y transformations 
@@ -59,6 +60,10 @@ class Graph():
         self.nodes = defaultdict(list)
         self.direction = direction
 
+def addTuple(atuple, btuple):
+    result = tuple(map(add, atuple, btuple))    
+    return result
+
 def generateBoard(board, n):
     '''
     constructs a dictionary of nodes, where each node is a key
@@ -69,7 +74,7 @@ def generateBoard(board, n):
         for y in range(n):
             board.nodes[(x,y)].append(())
 
-def findNeighbors(board):
+def findMoves(board):
     '''
     for each node in board.nodes, findNeighbor creates a list of possible
     neighbors. if those possible neighbors exist in board.nodes, then
@@ -77,13 +82,12 @@ def findNeighbors(board):
     confirmed neighbor. if neighbor is not in board.nodes, nothing happens. 
     '''
     for key in board.nodes:
-        listnode = list(key)
-        listnode[0] = int(listnode[0])
-        listnode[1] = int(listnode[1])
-        possibleneighbors = [(listnode[0]+1, listnode[1]), (listnode[0], listnode[1]+1), (listnode[0]-1, listnode[1]), (listnode[0], listnode[1]-1)]
-        for neighbor in possibleneighbors:
-            if board.nodes.has_key(neighbor) == True:
-                board.nodes[key].append(neighbor) 
+        for move in knightmoves:
+            # debug print(key)
+            # debug print(knightmoves[move])
+            temp = tuple(map(sum, zip(key, knightmoves[move])))
+            if temp in board.nodes:
+                board.nodes[key].append(temp) 
             else:
                 pass
 
@@ -91,9 +95,9 @@ def main():
     chessboard = Graph()
     generateBoard(chessboard, 5)
     print("Board nodes: " + str(chessboard.nodes.keys()))
-    print("Neighbors (should be empty): " + str(chessboard.nodes.values()))
-    findNeighbors(chessboard)
-    print("Neighbors (shouldn't be empty: " +str(chessboard.nodes.values()))
+    #debug  print("Possible moves (empty): " + str(chessboard.nodes.values()))
+    findMoves(chessboard)
+    print("Possible moves (shouldn't be empty: " +str(chessboard.nodes.values()))
 
 main() 
         
