@@ -33,6 +33,8 @@ nick creel - algorithms - spring 2019 - marlboro college
 GNU GPL https://www.gnu.org/licenses/gpl.html
 '''
 from collections import defaultdict
+from turtle import *
+import re
 
 knightmoves = { 'upleft' : (-1,2),  #all the possible moves the knight can make
         'upright' : (1,2),  #defined as a tuple of x,y transformations 
@@ -158,9 +160,35 @@ def main():
     findMoves(chessboard)
     #debug print("Possible moves (shouldn't be empty: " +str(chessboard.nodes.values()))
     nmoves = numMoves(chessboard)
-    start = (0,0)
+    start = input("please enter a possible node from the list above like so: 0,0\n >>>")
+    start = start.split(',')
+    start = [int(start[n]) for n in range(len(start))]
+    start = tuple(start)  
     visited.push(start)
     knightTour(chessboard, start, nmoves, visited)
     print("Visited nodes in Knight's Tour: " + str(visited.values))
+    
+    
+    t = Turtle(shape = "circle") #time to draw a graph
+    t.pencolor("blue")
+    screen = t.getscreen()
+    screen.setworldcoordinates(0,0,n,n)
+    xturtle = Turtle(shape = "turtle")
+    yturtle = Turtle(shape = "turtle")
+    xturtle.speed(100)
+    yturtle.speed(100)
+    t.speed(5)
+    for row in range(0,n):
+        for column in range(0,n):
+            xturtle.goto(row, column)
+            xturtle.goto(row+1, column)
+            xturtle.goto(row+1, column+1)
+            yturtle.goto(row,column)
+            yturtle.goto(row, column+1)
+            yturtle.goto(row+1, column+1)
+    t.goto(0.5, 0.5)
+    for value in visited.values:
+        t.goto(value[0]+0.5, value[1]+0.5)
+    screen.exitonclick()
 main() 
         
